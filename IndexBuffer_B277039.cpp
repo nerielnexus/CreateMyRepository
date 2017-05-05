@@ -11,7 +11,6 @@
 #include <d3dx9.h>
 #include <iostream>
 #include <fstream>
-#include <vector>
 
 
 
@@ -19,16 +18,15 @@
 *  전역변수
 *------------------------------------------------------------------------------
 */
-LPDIRECT3D9             g_pD3D = NULL; /// D3D 디바이스를 생성할 D3D객체변수
+LPDIRECT3D9             g_pD3D       = NULL; /// D3D 디바이스를 생성할 D3D객체변수
 LPDIRECT3DDEVICE9       g_pd3dDevice = NULL; /// 렌더링에 사용될 D3D디바이스
-LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL; /// 정점을 보관할 정점버퍼
-LPDIRECT3DINDEXBUFFER9	g_pIB = NULL; /// 인덱스를 보관할 인덱스버퍼
+LPDIRECT3DVERTEXBUFFER9 g_pVB        = NULL; /// 정점을 보관할 정점버퍼
+LPDIRECT3DINDEXBUFFER9	g_pIB        = NULL; /// 인덱스를 보관할 인덱스버퍼
 
-
-									  /// 사용자 정점을 정의할 구조체
+											 /// 사용자 정점을 정의할 구조체
 struct CUSTOMVERTEX
 {
-	FLOAT x , y , z;	/// 정점의 변환된 좌표
+	FLOAT x, y, z;	/// 정점의 변환된 좌표
 	DWORD color;	/// 정점의 색깔
 };
 
@@ -37,8 +35,8 @@ struct CUSTOMVERTEX
 
 struct MYINDEX
 {
-	WORD	_0 , _1 , _2;		/// 일반적으로 인덱스는 16비트의 크기를 갖는다.
-								/// 32비트의 크기도 가능하지만 구형 그래픽카드에서는 지원되지 않는다.
+	WORD	_0, _1, _2;		/// 일반적으로 인덱스는 16비트의 크기를 갖는다.
+							/// 32비트의 크기도 가능하지만 구형 그래픽카드에서는 지원되지 않는다.
 };
 
 CUSTOMVERTEX* myvertex = NULL;  // 동적할당할 CUSTOMVERTEX 배열
@@ -85,13 +83,13 @@ void FileToBuffer( )
 HRESULT InitD3D( HWND hWnd )
 {
 	/// 디바이스를 생성하기위한 D3D객체 생성
-	if ( NULL == ( g_pD3D = Direct3DCreate9( D3D_SDK_VERSION ) ) )
+	if( NULL == ( g_pD3D = Direct3DCreate9( D3D_SDK_VERSION ) ) )
 		return E_FAIL;
 
 	/// 디바이스를 생성할 구조체
 	/// 복잡한 오브젝트를 그릴것이기때문에, 이번에는 Z버퍼가 필요하다.
 	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory( &d3dpp , sizeof( d3dpp ) );
+	ZeroMemory( &d3dpp, sizeof(d3dpp) );
 	d3dpp.Windowed = TRUE;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
@@ -99,21 +97,21 @@ HRESULT InitD3D( HWND hWnd )
 	d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 
 	/// 디바이스 생성
-	if ( FAILED( g_pD3D->CreateDevice( D3DADAPTER_DEFAULT , D3DDEVTYPE_HAL , hWnd ,
-		 D3DCREATE_SOFTWARE_VERTEXPROCESSING ,
-		 &d3dpp , &g_pd3dDevice ) ) )
+	if( FAILED( g_pD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
+		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+		&d3dpp, &g_pd3dDevice ) ) )
 	{
 		return E_FAIL;
 	}
 
 	/// 컬링기능을 끈다.
-	g_pd3dDevice->SetRenderState( D3DRS_CULLMODE , D3DCULL_CCW );
+	g_pd3dDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_CCW );
 
 	/// Z버퍼기능을 켠다.
-	g_pd3dDevice->SetRenderState( D3DRS_ZENABLE , TRUE );
+	g_pd3dDevice->SetRenderState( D3DRS_ZENABLE, TRUE );
 
 	/// 정점에 색깔값이 있으므로, 광원기능을 끈다.
-	g_pd3dDevice->SetRenderState( D3DRS_LIGHTING , FALSE );
+	g_pd3dDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
 
 	return S_OK;
 }
@@ -178,9 +176,9 @@ HRESULT InitVB( )
 	/// 정점버퍼 생성
 	/// 8개의 사용자정점을 보관할 메모리를 할당한다.
 	/// FVF를 지정하여 보관할 데이터의 형식을 지정한다.
-	if ( FAILED( g_pd3dDevice->CreateVertexBuffer( 8 * sizeof( CUSTOMVERTEX ),
-		 0, D3DFVF_CUSTOMVERTEX,
-		 D3DPOOL_DEFAULT, &g_pVB, NULL ) ) )
+	if( FAILED( g_pd3dDevice->CreateVertexBuffer( 8*sizeof(CUSTOMVERTEX),
+		0, D3DFVF_CUSTOMVERTEX,
+		D3DPOOL_DEFAULT, &g_pVB, NULL ) ) )
 	{
 		return E_FAIL;
 	}
@@ -245,26 +243,26 @@ HRESULT InitIB( )
 * 행렬 설정
 *------------------------------------------------------------------------------
 */
-VOID SetupMatrices( )
+VOID SetupMatrices()
 {
 	/// 월드행렬
 	D3DXMATRIXA16 matWorld;
 	D3DXMatrixIdentity( &matWorld );							/// 월드행렬을 단위행렬으로 설정
-	D3DXMatrixRotationY( &matWorld , GetTickCount( ) / 500.0f );	/// Y축을 중심으로 회전행렬 생성
-	g_pd3dDevice->SetTransform( D3DTS_WORLD , &matWorld );		/// 디바이스에 월드행렬 설정
+	D3DXMatrixRotationY( &matWorld, GetTickCount()/500.0f );	/// Y축을 중심으로 회전행렬 생성
+	g_pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );		/// 디바이스에 월드행렬 설정
 
 																/// 뷰행렬을 설정
-	D3DXVECTOR3 vEyePt( 0.0f , 3.0f , -5.0f );
-	D3DXVECTOR3 vLookatPt( 0.0f , 0.0f , 0.0f );
-	D3DXVECTOR3 vUpVec( 0.0f , 1.0f , 0.0f );
+	D3DXVECTOR3 vEyePt( 0.0f, 3.0f,-5.0f );
+	D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 0.0f );
+	D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
 	D3DXMATRIXA16 matView;
-	D3DXMatrixLookAtLH( &matView , &vEyePt , &vLookatPt , &vUpVec );
-	g_pd3dDevice->SetTransform( D3DTS_VIEW , &matView );
+	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
+	g_pd3dDevice->SetTransform( D3DTS_VIEW, &matView );
 
 	/// 프로젝션 행렬 설정
 	D3DXMATRIXA16 matProj;
-	D3DXMatrixPerspectiveFovLH( &matProj , D3DX_PI / 4 , 1.0f , 1.0f , 100.0f );
-	g_pd3dDevice->SetTransform( D3DTS_PROJECTION , &matProj );
+	D3DXMatrixPerspectiveFovLH( &matProj, D3DX_PI/4, 1.0f, 1.0f, 100.0f );
+	g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
 
@@ -275,17 +273,17 @@ VOID SetupMatrices( )
 */
 VOID Cleanup( )
 {
-	if ( g_pIB != NULL )
-		g_pIB->Release( );
+	if( g_pIB != NULL )        
+		g_pIB->Release();
 
-	if ( g_pVB != NULL )
-		g_pVB->Release( );
+	if( g_pVB != NULL )        
+		g_pVB->Release();
 
-	if ( g_pd3dDevice != NULL )
-		g_pd3dDevice->Release( );
+	if( g_pd3dDevice != NULL ) 
+		g_pd3dDevice->Release();
 
-	if ( g_pD3D != NULL )
-		g_pD3D->Release( );
+	if( g_pD3D != NULL )       
+		g_pD3D->Release();
 
 	if ( myvertex != NULL )
 		delete [ ] myvertex;
@@ -301,33 +299,33 @@ VOID Cleanup( )
 * 화면 그리기
 *------------------------------------------------------------------------------
 */
-VOID Render( )
+VOID Render()
 {
 	/// 후면버퍼와 Z버퍼 초기화
-	g_pd3dDevice->Clear( 0 , NULL , D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER , D3DCOLOR_XRGB( 0 , 0 , 255 ) , 1.0f , 0 );
+	g_pd3dDevice->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,255), 1.0f, 0 );
 
 	// 행렬설정
-	SetupMatrices( );
+	SetupMatrices();
 
 	/// 렌더링 시작
-	if ( SUCCEEDED( g_pd3dDevice->BeginScene( ) ) )
+	if( SUCCEEDED( g_pd3dDevice->BeginScene() ) )
 	{
 		/// 정점버퍼의 삼각형을 그린다.
 		/// 1. 정점정보가 담겨있는 정점버퍼를 출력 스트림으로 할당한다.
-		g_pd3dDevice->SetStreamSource( 0 , g_pVB , 0 , sizeof( CUSTOMVERTEX ) );
+		g_pd3dDevice->SetStreamSource( 0, g_pVB, 0, sizeof(CUSTOMVERTEX) );
 		/// 2. D3D에게 정점쉐이더 정보를 지정한다. 대부분의 경우에는 FVF만 지정한다.
 		g_pd3dDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
 		/// 3. 인덱스버퍼를 지정한다.
 		g_pd3dDevice->SetIndices( g_pIB );
 		/// 4. DrawIndexedPrimitive()를 호출한다.
-		g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST , 0 , 0 , 8 , 0 , 12 );
+		g_pd3dDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12 );
 
 		/// 렌더링 종료
-		g_pd3dDevice->EndScene( );
+		g_pd3dDevice->EndScene();
 	}
 
 	/// 후면버퍼를 보이는 화면으로!
-	g_pd3dDevice->Present( NULL , NULL , NULL , NULL );
+	g_pd3dDevice->Present( NULL, NULL, NULL, NULL );
 }
 
 
